@@ -1,23 +1,29 @@
 [package]
-name = "crystals-dilithium"
-version = "1.0.0"
+name = "vaz256"
+version = "0.1.0"
 edition = "2021"
 license = "GPL-3.0"
-description = "Pure RUST implementation of CRYSTALS-Dilithium digital signature scheme"
+description = "Pure Rust implementation of Verified Abbreviated Zeta 256 bits (VAZ256) - a digital signature scheme for post-quantum computing-resistant signatures combining Dilithium5 and SHAKE256 for key compressions"
 readme = "README.md"
-homepage = "https://www.quantumblockchains.io/"
-repository = "https://github.com/Quantum-Blockchains/dilithium"
-keywords = ["cryptography", "quantum", "dilithium", "digital-signatures", "security"]
-categories = ["cryptography", "post-quantum-cryptography"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Fran Luis Vazquez Alonso <cybervazquez@protonmail.com>"]
+homepage = "https://github.com/cybervazquez/vaz256"
+repository = "https://github.com/cybervazquez/vaz256"
+keywords = ["cryptography", "quantum", "dilithium", "signatures", "security"]
+categories = ["cryptography"]
 
 [dependencies]
-rand = "0.7.3"
+rand = "0.8.5"
 
 [dev-dependencies]
-criterion = { version = "0.4", features = ["html_reports"] }
+criterion = "0.5"
+pqcrypto-dilithium = "0.5"
+falcon-rust = "0.1.2"
 
 [[bench]]
-name = "dilithium_benchmarks"
+name = "crypto_benchmarks"
 harness = false
+
+[[bench]]
+name = "vaz256_benchmarks"
+harness = false
+

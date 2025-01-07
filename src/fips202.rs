@@ -1,3 +1,17 @@
+// This module was originally derived from CRYSTALS-Dilithium
+// Source: https://github.com/Quantum-Blockchains/dilithium
+// Which itself was ported from: https://github.com/pq-crystals/dilithium
+// Original implementation by: Quantum Blockchains (https://www.quantumblockchains.io/)
+// 
+// Modified for use in VAZ256™
+// Copyright (C) 2025 Fran Luis Vazquez Alonso
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+
 pub const SHAKE128_RATE: usize = 168;
 pub const SHAKE256_RATE: usize = 136;
 
@@ -486,7 +500,7 @@ pub fn shake256(output: &mut [u8], mut outlen: usize, input: &[u8], inlen: usize
 pub fn shake128_stream_init(state: &mut KeccakState, seed: &[u8], nonce: u16) {
     let t = [nonce as u8, (nonce >> 8) as u8];
     state.init();
-    shake128_absorb(state, seed, crate::params::SEEDBYTES);
+    shake128_absorb(state, seed, crate::params_dilithium5::SEEDBYTES);
     shake128_absorb(state, &t, 2);
     shake128_finalize(state);
 }
@@ -494,7 +508,7 @@ pub fn shake128_stream_init(state: &mut KeccakState, seed: &[u8], nonce: u16) {
 pub fn shake256_stream_init(state: &mut KeccakState, seed: &[u8], nonce: u16) {
     let t = [nonce as u8, (nonce >> 8) as u8];
     state.init();
-    shake256_absorb(state, seed, crate::params::CRHBYTES);
+    shake256_absorb(state, seed, crate::params_dilithium5::CRHBYTES);
     shake256_absorb(state, &t, 2);
     shake256_finalize(state);
 }

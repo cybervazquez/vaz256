@@ -1,5 +1,26 @@
+// This module was originally derived from CRYSTALS-Dilithium
+// Source: https://github.com/Quantum-Blockchains/dilithium
+// Which itself was ported from: https://github.com/pq-crystals/dilithium
+// Original implementation by: Quantum Blockchains (https://www.quantumblockchains.io/)
+// 
+// Modified for use in VAZ256™
+// Copyright (C) 2025 Fran Luis Vazquez Alonso
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Changes made to the original code:
+// - Extracted and adapted only Dilithium5 implementation
+//
+// Note: This implementation specifically uses only the Dilithium5 variant
+// from the original CRYSTALS-Dilithium implementation for use in VAZ256™
+// signature scheme.
+
+
 /// A much needed cast.
-const N: usize = crate::params::N as usize;
+const N: usize = crate::params_dilithium5::N as usize;
 
 /// Precomputed roots of unity.
 const ZETAS: [i32; N] = [

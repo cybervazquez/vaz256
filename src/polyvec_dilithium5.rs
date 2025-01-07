@@ -1,9 +1,30 @@
+// This module was originally derived from CRYSTALS-Dilithium
+// Source: https://github.com/Quantum-Blockchains/dilithium
+// Which itself was ported from: https://github.com/pq-crystals/dilithium
+// Original implementation by: Quantum Blockchains (https://www.quantumblockchains.io/)
+// 
+// Modified for use in VAZ256™
+// Copyright (C) 2025 Fran Luis Vazquez Alonso
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Changes made to the original code:
+// - Extracted and adapted only Dilithium5 implementation
+//
+// Note: This implementation specifically uses only the Dilithium5 variant
+// from the original CRYSTALS-Dilithium implementation for use in VAZ256™
+// signature scheme.
+
+
 use std::mem::swap;
 
-use crate::{params, poly, poly::Poly};
+use crate::{params_dilithium5, poly_dilithium5, poly_dilithium5::Poly};
 
-const L: usize = params::lvl5::L;
-const K: usize = params::lvl5::K;
+const L: usize = params_dilithium5::L;
+const K: usize = params_dilithium5::K;
 
 #[derive(Clone, Copy)]
 pub struct Polyveck {
@@ -35,7 +56,7 @@ impl Default for Polyvecl {
 pub fn matrix_expand(mat: &mut [Polyvecl], rho: &[u8]) {
     for i in 0..K {
         for j in 0..L {
-            poly::uniform(&mut mat[i].vec[j], rho, ((i << 8) + j) as u16);
+            poly_dilithium5::uniform(&mut mat[i].vec[j], rho, ((i << 8) + j) as u16);
         }
     }
 }
@@ -43,11 +64,11 @@ pub fn matrix_expand(mat: &mut [Polyvecl], rho: &[u8]) {
 /// Pointwise multiply vectors of polynomials of length L, multiply resulting vector by 2^{-32} and add (accumulate) polynomials in it.
 /// Input/output vectors are in NTT domain representation. Input coefficients are assumed to be less than 22*Q. Output coeffcient are less than 2*L*Q.
 pub fn l_pointwise_acc_montgomery(w: &mut Poly, u: &Polyvecl, v: &Polyvecl) {
-    poly::pointwise_montgomery(w, &u.vec[0], &v.vec[0]);
+    poly_dilithium5::pointwise_montgomery(w, &u.vec[0], &v.vec[0]);
     let mut t = Poly::default();
     for i in 1..L {
-        poly::pointwise_montgomery(&mut t, &u.vec[i], &v.vec[i]);
-        poly::add_ip(w, &t);
+        poly_dilithium5::pointwise_montgomery(&mut t, &u.vec[i], &v.vec[i]);
+        poly_dilithium5::add_ip(w, &t);
     }
 }
 
@@ -59,19 +80,19 @@ pub fn matrix_pointwise_montgomery(t: &mut Polyveck, mat: &[Polyvecl], v: &Polyv
 
 pub fn l_uniform_eta(v: &mut Polyvecl, seed: &[u8], mut nonce: u16) {
     for i in 0..L {
-        poly::lvl5::uniform_eta(&mut v.vec[i], seed, nonce);
+        poly_dilithium5::uniform_eta(&mut v.vec[i], seed, nonce);
         nonce += 1;
     }
 }
 
 pub fn l_uniform_gamma1(v: &mut Polyvecl, seed: &[u8], nonce: u16) {
     for i in 0..L {
-        poly::lvl5::uniform_gamma1(&mut v.vec[i], seed, L as u16 * nonce + i as u16);
+        poly_dilithium5::uniform_gamma1(&mut v.vec[i], seed, L as u16 * nonce + i as u16);
     }
 }
 pub fn l_reduce(v: &mut Polyvecl) {
     for i in 0..L {
-        poly::reduce(&mut v.vec[i]);
+        poly_dilithium5::reduce(&mut v.vec[i]);
     }
 }
 
@@ -79,32 +100,32 @@ pub fn l_reduce(v: &mut Polyvecl) {
 /// No modular reduction is performed.
 pub fn l_add(w: &mut Polyvecl, v: &Polyvecl) {
     for i in 0..L {
-        poly::add_ip(&mut w.vec[i], &v.vec[i]);
+        poly_dilithium5::add_ip(&mut w.vec[i], &v.vec[i]);
     }
 }
 
 /// Forward NTT of all polynomials in vector of length L. Output coefficients can be up to 16*Q larger than input coefficients.
 pub fn l_ntt(v: &mut Polyvecl) {
     for i in 0..L {
-        poly::ntt(&mut v.vec[i]);
+        poly_dilithium5::ntt(&mut v.vec[i]);
     }
 }
 
 pub fn l_invntt_tomont(v: &mut Polyvecl) {
     for i in 0..L {
-        poly::invntt_tomont(&mut v.vec[i]);
+        poly_dilithium5::invntt_tomont(&mut v.vec[i]);
     }
 }
 
 pub fn l_pointwise_poly_montgomery(r: &mut Polyvecl, a: &Poly, v: &Polyvecl) {
     for i in 0..L {
-        poly::pointwise_montgomery(&mut r.vec[i], a, &v.vec[i]);
+        poly_dilithium5::pointwise_montgomery(&mut r.vec[i], a, &v.vec[i]);
     }
 }
 
 pub fn l_chknorm(v: &Polyvecl, bound: i32) -> u8 {
     for i in 0..L {
-       if poly::chknorm(&v.vec[i], bound) > 0 {
+       if poly_dilithium5::chknorm(&v.vec[i], bound) > 0 {
         return 1;
        } 
     }
@@ -115,7 +136,7 @@ pub fn l_chknorm(v: &Polyvecl, bound: i32) -> u8 {
 
 pub fn k_uniform_eta(v: &mut Polyveck, seed: &[u8], mut nonce: u16) {
     for i in 0..K {
-        poly::lvl5::uniform_eta(&mut v.vec[i], seed, nonce);
+        poly_dilithium5::uniform_eta(&mut v.vec[i], seed, nonce);
         nonce += 1
     }
 }
@@ -125,7 +146,7 @@ pub fn k_uniform_eta(v: &mut Polyveck, seed: &[u8], mut nonce: u16) {
 pub fn k_reduce(v: &mut Polyveck)
 {
   for i in 0..K {
-    poly::reduce(&mut v.vec[i]);
+    poly_dilithium5::reduce(&mut v.vec[i]);
   }
 }
 
@@ -134,7 +155,7 @@ pub fn k_reduce(v: &mut Polyveck)
 pub fn k_caddq(v: &mut Polyveck)
 {
   for i in 0..K {
-    poly::caddq(&mut v.vec[i]);
+    poly_dilithium5::caddq(&mut v.vec[i]);
   }
 }
 
@@ -143,7 +164,7 @@ pub fn k_caddq(v: &mut Polyveck)
 pub fn k_add(w: &mut Polyveck, v: &Polyveck)
 {
   for i in 0..K {
-    poly::add_ip(&mut w.vec[i], &v.vec[i]);
+    poly_dilithium5::add_ip(&mut w.vec[i], &v.vec[i]);
   }
 }
 
@@ -152,7 +173,7 @@ pub fn k_add(w: &mut Polyveck, v: &Polyveck)
 /// to be less than 2*Q. No modular reduction is performed.
 pub fn k_sub(w: &mut Polyveck, v: &Polyveck) {
     for i in 0..K {
-        poly::sub_ip(&mut w.vec[i], &v.vec[i]);
+        poly_dilithium5::sub_ip(&mut w.vec[i], &v.vec[i]);
     }
 }
 
@@ -160,7 +181,7 @@ pub fn k_sub(w: &mut Polyveck, v: &Polyveck) {
 /// reduction. Assumes input coefficients to be less than 2^{32-D}.
 pub fn k_shiftl(v: &mut Polyveck) {
     for i in 0..K {
-        poly::shiftl(&mut v.vec[i]);
+        poly_dilithium5::shiftl(&mut v.vec[i]);
     }
 }
 
@@ -168,7 +189,7 @@ pub fn k_shiftl(v: &mut Polyveck) {
 /// coefficients can be up to 16*Q larger than input coefficients.
 pub fn k_ntt(v: &mut Polyveck) {
     for i in 0..K {
-        poly::ntt(&mut v.vec[i]);
+        poly_dilithium5::ntt(&mut v.vec[i]);
     }
 }
 
@@ -177,13 +198,13 @@ pub fn k_ntt(v: &mut Polyveck) {
 /// than 2*Q.
 pub fn k_invntt_tomont(v: &mut Polyveck) {
     for i in 0..K {
-        poly::invntt_tomont(&mut v.vec[i]);
+        poly_dilithium5::invntt_tomont(&mut v.vec[i]);
     }
 }
 
 pub fn k_pointwise_poly_montgomery(r: &mut Polyveck, a: &Poly, v: &Polyveck) {
     for i in 0..K {
-        poly::pointwise_montgomery(&mut r.vec[i], a, &v.vec[i]);
+        poly_dilithium5::pointwise_montgomery(&mut r.vec[i], a, &v.vec[i]);
     }
 }
 
@@ -193,7 +214,7 @@ pub fn k_pointwise_poly_montgomery(r: &mut Polyveck, a: &Poly, v: &Polyveck) {
 /// Returns 0 if norm of all polynomials are strictly smaller than B and 1 otherwise.
 pub fn k_chknorm(v: &Polyveck, bound: i32) -> u8 {
     for i in 0..K {
-        if poly::chknorm(&v.vec[i], bound) == 1 {
+        if poly_dilithium5::chknorm(&v.vec[i], bound) == 1 {
             return 1;
         }
     }
@@ -204,13 +225,13 @@ pub fn k_chknorm(v: &Polyveck, bound: i32) -> u8 {
 /// Assumes coefficients to be standard representatives.
 pub fn k_power2round(v1: &mut Polyveck, v0: &mut Polyveck) {
     for i in 0..K {
-        poly::power2round(&mut v1.vec[i], &mut v0.vec[i]);
+        poly_dilithium5::power2round(&mut v1.vec[i], &mut v0.vec[i]);
     }
 }
 
 pub fn k_decompose(v1: &mut Polyveck, v0: &mut Polyveck) {
     for i in 0..K {
-        poly::lvl5::decompose(&mut v1.vec[i], &mut v0.vec[i]);
+        poly_dilithium5::decompose(&mut v1.vec[i], &mut v0.vec[i]);
     }
     swap(v1, v0);
 }
@@ -218,19 +239,19 @@ pub fn k_decompose(v1: &mut Polyveck, v0: &mut Polyveck) {
 pub fn k_make_hint(h: &mut Polyveck, v0: &Polyveck, v1: &Polyveck) -> i32 {
     let mut s: i32 = 0;
     for i in 0..K {
-        s += poly::lvl5::make_hint(&mut h.vec[i], &v0.vec[i], &v1.vec[i]);
+        s += poly_dilithium5::make_hint(&mut h.vec[i], &v0.vec[i], &v1.vec[i]);
     }
     s
 }
 
 pub fn k_use_hint(a: &mut Polyveck, hint: &Polyveck) {
     for i in 0..K {
-        poly::lvl5::use_hint(&mut a.vec[i], &hint.vec[i]);
+        poly_dilithium5::use_hint(&mut a.vec[i], &hint.vec[i]);
     }
 }
 
 pub fn k_pack_w1(r: &mut [u8], a: &Polyveck) {
     for i in 0..K {
-        poly::lvl5::w1_pack(&mut r[i * params::lvl5::POLYW1_PACKEDBYTES..], &a.vec[i]);
+        poly_dilithium5::w1_pack(&mut r[i * params_dilithium5::POLYW1_PACKEDBYTES..], &a.vec[i]);
     }
 }
