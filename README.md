@@ -8,7 +8,6 @@ This project includes modified code from the following open-source projects:
 
 - Parts of CRYSTALS-Dilithium Rust implementation by Quantum Blockchains
   - Original Repository: https://github.com/Quantum-Blockchains/dilithium
-  - Files: [list of specific files containing modified code]
   - Original License: GPL-3.0
   - Which itself was ported from the reference implementation at: https://github.com/pq-crystals/dilithium
 
